@@ -14,7 +14,6 @@ export const LoginAction = createAsyncThunk(
     try {
       const response = await userService.login(data);
       if (response?.status === 200) {
-        // localStorage.setItem("user", response.data);
         return response.data;
       }
     } catch (error) {
@@ -30,13 +29,14 @@ export const userSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(LoginAction.pending, (state) => {
-        state.loder = true;
+        state.loader = true;
       })
       .addCase(LoginAction.fulfilled, (state, action) => {
         state.loader = false;
         state.user = action.payload;
+        state.status = true;
       })
-      .addCase(LoginAction.rejected, (state, action) => {
+      .addCase(LoginAction.rejected, (state) => {
         state.loader = false;
       });
   },

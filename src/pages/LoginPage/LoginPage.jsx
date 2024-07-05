@@ -13,9 +13,7 @@ import { useNavigate } from "react-router-dom/dist";
 
 const LoginPage = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate()
   const { user, loader } = useSelector((state) => state.user);
-  console.log(user);
 
   const formik = useFormik({
     initialValues: {
