@@ -26,7 +26,7 @@ export const initializeSocket = () => (dispatch) => {
     dispatch(setConnected(false));
   });
 
-  // setSocketInstance(socket);
+  setSocketInstance(socket);
 };
 
 export const connectUser = (email) => {

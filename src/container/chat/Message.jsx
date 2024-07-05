@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import face2 from "../../assets/images/faces/select2/p-1.jpg";
 import face4 from "../../assets/images/faces/select2/p-1.jpg";
 import face3 from "../../assets/images/faces/select2/p-1.jpg";
@@ -6,59 +6,45 @@ import face5 from "../../assets/images/faces/select2/p-1.jpg";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import { Link, useParams } from "react-router-dom";
 import { Form } from "react-bootstrap";
-import { useSelector } from "react-redux";
-import { getAllMessages } from "../../redux/socket/messageSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllMessages, sendMessage } from "../../redux/socket/messageSlice";
 import moment from "moment";
 
 const Message = () => {
+  const dispatch = useDispatch();
   const roomId = useParams()?.roomId;
-  const { messages } = useSelector((state) => state.messages);
+  const [message, setMessage] = useState("");
   const { user } = useSelector((state) => state.user);
+  const { list } = useSelector((state) => state.conversations);
+  const { messages, currentPage, totalPages } = useSelector(
+    (state) => state.messages
+  );
+  let recpUser = list?.filter((lis) => lis?.roomId === roomId);
+  recpUser = recpUser[0];
 
   useEffect(() => {
-    getAllMessages(roomId);
-  }, [roomId]);
+    dispatch(getAllMessages(roomId));
+  }, [dispatch, roomId]);
 
-  const mesgs = [
-    {
-      sender: "668686e1d1fd9c86c58c7b7e",
-      recipient: "668686ebd1fd9c86c58c7b81",
-      text: "Nice to meet you 😀",
-      status: "delivered",
-      timestamp: "2024-07-05T11:11:47Z",
-    },
-    {
-      sender: "668686ebd1fd9c86c58c7b81",
-      recipient: "668686e1d1fd9c86c58c7b7e",
-      text: "It is a long established fact that a reader will be distracted by the readable content of a page when",
-      status: "read",
-      timestamp: "2024-07-05T11:14:47Z",
-    },
-    {
-      sender: "668686e1d1fd9c86c58c7b7e",
-      recipient: "668686ebd1fd9c86c58c7b81",
-      text: "Nice to meet you 😀",
-      status: "delivered",
-      timestamp: "2024-07-05T11:16:47Z",
-    },
-    {
-      sender: "668686ebd1fd9c86c58c7b81",
-      recipient: "668686e1d1fd9c86c58c7b7e",
-      text: "Nice to meet you 😀",
-      status: "delivered",
-      timestamp: "2024-07-05T11:18:47Z",
-    },
-    {
-      sender: "668686e1d1fd9c86c58c7b7e",
-      recipient: "668686ebd1fd9c86c58c7b81",
-      text: "Nice to meet you 😀",
-      status: "delivered",
-      timestamp: "2024-07-05T11:20:47Z",
-    },
-  ];
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    console.log(message);
+    const messageData = {
+      recipientEmail: recpUser?.otherUser?.email,
+      username: user?.username,
+      message: {
+        sender: user?._id,
+        recipient: recpUser?.otherUser?._id,
+        roomId: roomId,
+        text: message,
+      },
+    };
+    dispatch(sendMessage(messageData));
+    setMessage("");
+  };
 
   return (
-    <div className="main-chat-area border">
+    <form onSubmit={handleSendMessage} className="main-chat-area border">
       <div className="d-flex align-items-center p-2 border-bottom">
         <div className="me-2 lh-1">
           <span className="avatar avatar-lg online me-2 avatar-rounded chatstatusperson">
@@ -77,11 +63,11 @@ const Message = () => {
       <div className="chat-content p-0">
         <PerfectScrollbar>
           <ul className="list-unstyled chat-content">
-            {mesgs.map((msg, idx) => (
+            {messages.map((msg, idx) => (
               <li
                 key={idx}
                 className={`${
-                  msg.sender === user._id ? "chat-item-start" : "chat-item-end"
+                  msg.sender !== user._id ? "chat-item-start" : "chat-item-end"
                 } `}
               >
                 <div className="chat-list-inner">
@@ -93,7 +79,9 @@ const Message = () => {
                   <div className="ms-3">
                     <span className="chatting-user-info">
                       <span className="chatnameperson">
-                        {msg.sender === user._id ? user?.name : ""}
+                        {msg.sender === user._id
+                          ? user?.name
+                          : recpUser?.otherUser?.name}
                       </span>{" "}
                       <span className="msg-sent-time">
                         {moment(msg?.timestamp).format(
@@ -118,16 +106,20 @@ const Message = () => {
           className="form-control"
           placeholder="Type your message here..."
           type="text"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
         />
-        <Link
+        <button
           aria-label="anchor"
           className="btn btn-primary mx-2 btn-icon btn-send"
           to="#"
+          // onClick={handleSendMessage}
+          type="submit"
         >
           <i className="ri-send-plane-2-line"></i>
-        </Link>
+        </button>
       </div>
-    </div>
+    </form>
   );
 };
 
