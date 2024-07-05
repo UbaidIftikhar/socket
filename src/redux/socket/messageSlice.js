@@ -46,20 +46,15 @@ export const sendMessage = (messageData) => (dispatch) => {
   const socket = getSocketInstance();
   socket.emit("send_message", messageData);
 
-  // socket.on("update_message", (response) => {
-  //   const { newId, oldId, roomId } = response;
-  //   const newMessage = {
-  //     ...messageData.message,
-  //     _id: newId,
-  //     roomId,
-  //   };
-  //   console.log(newMessage);
-  //   dispatch(addMessage(newMessage));
-  // });
-
   socket.on("send_message:error", (error) => {
     console.error(error);
   });
 };
 
+export const receiveMessage = () => (dispatch) => {
+  const socket = getSocketInstance();
+  socket.on("recieve_message", (message) => {
+    dispatch(addMessage(message));
+  });
+};
 export default messageSlice.reducer;

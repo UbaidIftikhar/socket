@@ -7,7 +7,11 @@ import PerfectScrollbar from "react-perfect-scrollbar";
 import { Link, useParams } from "react-router-dom";
 import { Form } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllMessages, sendMessage } from "../../redux/socket/messageSlice";
+import {
+  getAllMessages,
+  receiveMessage,
+  sendMessage,
+} from "../../redux/socket/messageSlice";
 import moment from "moment";
 
 const Message = () => {
@@ -23,6 +27,7 @@ const Message = () => {
   recpUser = recpUser[0];
 
   useEffect(() => {
+    dispatch(receiveMessage());
     dispatch(getAllMessages(roomId));
   }, [dispatch, roomId]);
 
